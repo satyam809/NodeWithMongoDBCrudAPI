@@ -6,20 +6,22 @@ exports.createUser = async (req, res) => {
   try {
     const { name, email, contact } = req.body;
     const errorData = {};
+
+    // Validate input data
     if (!name) {
-      errorData.name = 'required';
+      errorData.name = 'Name is required';
     }
     if (!email) {
-      errorData.email = 'required';
+      errorData.email = 'Email is required';
     }
     if (!contact) {
-      errorData.contact = 'required';
+      errorData.contact = 'Contact is required';
     }
 
     // Check if email already exists in the database
     const existingEmail = await User.findOne({ email });
     if (existingEmail) {
-      errorData.email = 'Email already exists.';
+      errorData.email = 'Email already exists';
     }
 
     // Check if contact already exists in the database
@@ -27,19 +29,23 @@ exports.createUser = async (req, res) => {
     if (existingContact) {
       errorData.contact = 'Contact already exists';
     }
-    if (errorData == '') {
-      const user = await User.create({ name, email, contact });
 
-      res.json({ message: 'User created successfully', data: user });
-    } else {
-      res.json({ error: errorData })
+    // Handle validation errors
+    if (Object.keys(errorData).length !== 0) {
+      return res.status(400).json({ error: errorData });
     }
 
+    // Create a new user
+    const user = await User.create({ name, email, contact });
+
+    // Send success response
+    return res.status(201).json({ message: 'User created successfully', data: user });
   } catch (error) {
     console.error('Error creating user:', error);
-    res.status(500).json({ error: error });
+    return res.status(500).json({ error: 'Failed to create user' });
   }
 };
+
 
 // userController.js
 
