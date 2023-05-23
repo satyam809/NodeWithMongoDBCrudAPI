@@ -13,7 +13,7 @@ exports.createUser = async (req, res) => {
       errorData.email = 'required';
     }
     if (!contact) {
-      errorData.email = 'required';
+      errorData.contact = 'required';
     }
 
     // Check if email already exists in the database
@@ -25,15 +25,19 @@ exports.createUser = async (req, res) => {
     // Check if contact already exists in the database
     const existingContact = await User.findOne({ contact });
     if (existingContact) {
-      errorData.email = 'Contact already exists';
+      errorData.contact = 'Contact already exists';
+    }
+    if (errorData == '') {
+      const user = await User.create({ name, email, contact });
+
+      res.json({ message: 'User created successfully', data: user });
+    } else {
+      res.json({ error: errorData })
     }
 
-    const user = await User.create({ name, email, contact });
-
-    res.status(201).json({ message: 'User created successfully', data: user });
   } catch (error) {
     console.error('Error creating user:', error);
-    res.status(500).json({ error: 'An error occurred while creating the user.' });
+    res.status(500).json({ error: error });
   }
 };
 
